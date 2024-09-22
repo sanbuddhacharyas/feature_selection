@@ -1,3 +1,7 @@
+import sys 
+import os
+sys.path.insert(0, '../')
+
 import pandas as pd
 import numpy as np
 import pickle
@@ -7,7 +11,7 @@ from sklearn.base import BaseEstimator, clone
 
 from typing import Tuple
 
-from src.utils import calculate_score
+from src.utils import calculate_score, pad_values
 
 class FeatureModelSelection():
     def __init__(self, 
@@ -45,7 +49,7 @@ class FeatureModelSelection():
         flag                    = False
 
         self.selected_features  = []
-        best_score              = [0, 0] if self.higher_good else 100.0
+        best_score              = 0 if self.higher_good else 100.0
         
         while len(self.selected_features) != len(all_features):
             one_line_score    = []
@@ -56,21 +60,22 @@ class FeatureModelSelection():
                 if feature not in self.selected_features:
                     testing_feature = self.selected_features + [feature]
                     
-                    score = self.scorer(model, self.X_train[testing_feature], self.y_train, self.kf)
-                                    
+                    score = calculate_score(model, self.scorer, self.X_train[testing_feature], self.y_train, self.kf)
+                  
                     one_line_score.append(score)
                     one_line_features.append(feature)
            
             one_line_score = np.array(one_line_score) if self.higher_good else one_line_score
             
             if self.higher_good:
-                best_socre_ind      = np.argmax(one_line_score[:,0])
+                best_socre_ind      = np.argmax(one_line_score)
                 one_line_best_score = one_line_score[best_socre_ind]
 
             else:
                 best_socre_ind, one_line_best_score = np.argmin(one_line_score), np.min(one_line_score)
 
             sel_one_line_feature    = one_line_features[best_socre_ind] 
+            print(sel_one_line_feature)
 
             temp = {}
             for key, score in zip(one_line_features, one_line_score):
@@ -78,7 +83,7 @@ class FeatureModelSelection():
                 temp[str(key)] = score
                 
             if self.higher_good:
-                if one_line_best_score[0] > best_score[0]:
+                if one_line_best_score > best_score:
                     best_score = one_line_best_score
                     self.selected_features.append(sel_one_line_feature)
                     self.all_feature_scores.append(temp)
@@ -106,7 +111,7 @@ class FeatureModelSelection():
         self.selected_features  = all_features.copy().tolist()
         self.all_feature_scores = []
 
-        best_score              = self.scorer(model, self.X_train[all_features], self.y_train, self.kf)
+        best_score              = calculate_score(model, self.scorer, self.X_train[all_features], self.y_train, self.kf)
         flag                    = False
 
         while len(self.selected_features) != 0:
@@ -117,13 +122,13 @@ class FeatureModelSelection():
                 if feature in self.selected_features: 
                     testing_feature = [i for i in self.selected_features if i != feature] # Remove the feature from the set
                     
-                    score = self.scorer(model, self.X_train[testing_feature], self.y_train, self.kf)
+                    score = calculate_score(model, self.scorer, self.X_train[testing_feature], self.y_train, self.kf)
                   
                     one_line_score.append(score)
                     one_line_features.append(feature)
            
             if self.higher_good:
-                best_socre_ind      = np.argmax(one_line_score[:,0])
+                best_socre_ind      = np.argmax(one_line_score)
                 one_line_best_score = one_line_score[best_socre_ind]
 
             else:
@@ -133,10 +138,12 @@ class FeatureModelSelection():
 
             temp = {}
             for key, score in zip(one_line_features, one_line_score):
-                temp[str(key)] = score
+                temp_ = self.selected_features.copy()
+                temp_.remove(key)
+                temp[str(temp_)] = score
 
             if self.higher_good:
-                if one_line_best_score[0] > best_score[0]:
+                if one_line_best_score > best_score:
                     best_score = one_line_best_score
                     self.selected_features.remove(sel_one_line_feature)
                     self.all_feature_scores.append(temp)
@@ -170,3 +177,26 @@ class FeatureModelSelection():
         # Return both training and testing r2 score
         return self.model.score(self.X_train[self.selected_features], self.y_train), \
                self.model.score(X_test[self.selected_features], y_test)
+    
+
+    def feature_selection_tabularize(self, feature_scores: dict, save_path:str) -> pd.DataFrame:
+
+        ind_header_name = {1:'Univariate Features', 2:'Bivariate Features', 3:'Trivariate Features', 4:'Quad', 5:'Quin', \
+                        6: 'Hexvariate Features', 7:'Heptavariate Features', 8:'Octavaraite Features', 9:'novemvariate Features', 10:"Ten", 11:''}
+        
+        num_features = len(feature_scores[0])
+        df           = pd.DataFrame()
+            
+        print("numfeatures", len(feature_scores))
+        for ind, all_feature in enumerate(feature_scores):
+            
+            feature_, scores   = pad_values(list(all_feature.keys()), list(all_feature.values()), num_features)
+            scores             = [round(float(i), 4) for i in scores]
+
+            df[ind_header_name[ind + 1]]  = feature_
+            df[f'Scores_{ind+1}']         = scores
+
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        df.to_excel(f'{save_path}', index=False)
+        print(df)
+        return df
