@@ -4,18 +4,17 @@ This repository contains code to perform wrapper-based feature selection (i.e. f
 
 ## Install requirements:
 ```
-pip install -r requirements.txt
+pip install ml-feature-selector
 ```
 
 ## How to use?
 Load model selection class from the package
 ```
-from src.featureSelector import FeatureModelSelection
+from ml_featselect.feature_selector import ModelFeatureSelection
 ```
 
-
 ```
-FeatureModelSelection(model=model,
+ModelFeatureSelection(model=model,
                       scorer=r2_score,
                       X_train=X_train,
                       y_train=y_train,
@@ -39,4 +38,6 @@ model_selection.feature_selection_tabularize(best_features, './feature_selected.
 ```
 
 Find the example at  ```main.py ```
+
+
 
