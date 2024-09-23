@@ -11,7 +11,7 @@ from sklearn.base import BaseEstimator, clone
 
 from typing import Tuple
 
-from featselect.utils import calculate_score, pad_values
+from ml_featselect.utils import calculate_score, pad_values
 
 class ModelFeatureSelection():
     def __init__(self, 

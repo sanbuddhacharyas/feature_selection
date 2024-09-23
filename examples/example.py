@@ -2,9 +2,10 @@ import pandas as pd
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
-from src.featureSelector import FeatureModelSelection
-from src.load_dataset import load_dataset
-from src.utils import perError
+from ml_featselect.feature_selector import ModelFeatureSelection
+from ml_featselect.load_dataset import load_dataset
+from ml_featselect.utils import perError
+
 
 from sklearn.metrics import make_scorer
 
@@ -19,7 +20,7 @@ if __name__ == '__main__':
                                                        standardize_type='mean_std')
     
     model           = KNeighborsRegressor()
-    model_selection = FeatureModelSelection(model=model,
+    model_selection = ModelFeatureSelection(model=model,
                                             scorer=perError(y_LOD=0.91),
                                             X_train=X_train,
                                             y_train=y_train,
