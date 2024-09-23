@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     license="MIT",
-    name="featureSelection",
+    name="ml_feature_selector",
     version="0.1.0",  # Versioning follows the semantic versioning system
     author="Sangam Man Buddhacharya",
-    author_email="sangambuddhacharya",
+    author_email="sangambuddhacharya@gmail.com",
     description="This package provides code for optimal feature selection using forward and backward wrapper-based methods. It also generates an Excel report that captures each step and result of the feature selection process, offering clear insights and explanations of the selected features.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
