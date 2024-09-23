@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
+    license="MIT",
     name="featureSelection",
     version="0.1.0",  # Versioning follows the semantic versioning system
     author="Sangam Man Buddhacharya",
@@ -22,5 +23,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.10',  # Minimum Python version
+    python_requires='>=3.9',  # Minimum Python version
 )
